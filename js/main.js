@@ -1,5 +1,7 @@
 const video = document.getElementById("video");
 
+let Ages = [];
+
 
 // This basically loades all the models before starting the video.
 Promise.all([
@@ -44,7 +46,34 @@ video.addEventListener("playing", () => {
     faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
     faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
 
+    // Calculating age every 1000 ms
+    const age = resizedDetections[0].age;
+    const calculatedAge = agepredictions(age);
+
+    const bottomRight = {
+      x: resizedDetections[0].detection.box.bottomRight.x - 50,
+      y: resizedDetections[0].detection.box.bottomRight.y
+    };
+
+    new faceapi.draw.DrawTextField(
+      [`${faceapi.utils.round(calculatedAge, 0)} years`],
+      bottomRight
+    ).draw(canvas);
+
   }, 1000);
 });
+
+
+function agepredictions(age) {
+  Ages = [age].concat(Ages).slice(0, 30);
+
+  const calculatedAge =
+    Ages.reduce((total, a) => total + a) / Ages.length;
+
+  return calculatedAge;
+}
+
+
+
 
 
